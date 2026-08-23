@@ -1,0 +1,494 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Walnut St. Labs homepage — page styles.
+
+   Loaded after nocturne.css, so anything here that shares a selector with the
+   design system deliberately overrides it. Every value below comes from the
+   Claude Design prototype ("Walnut St Labs Homepage.dc.html"); the prototype
+   held them as inline styles, and they are grouped into classes here without
+   being retuned. Tokens (--color-*, --space-*, --radius-*) all come from the
+   design system.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  text-wrap: pretty;
+  background: var(--color-bg);
+}
+
+a { color: var(--color-accent); text-decoration: none; }
+a:hover { color: var(--color-accent-300); }
+
+/* The page ground: an accent bloom off the top right, a pool of shadow at the
+   bottom left, over the base background. */
+.page {
+  min-height: 100vh;
+  font-family: var(--font-body);
+  color: var(--color-text);
+  background:
+    radial-gradient(1200px 720px at 82% -160px,
+      color-mix(in srgb, var(--color-accent-900) 75%, transparent), transparent 60%),
+    radial-gradient(1100px 800px at -10% 100%,
+      color-mix(in srgb, black 30%, transparent), transparent 55%),
+    var(--color-bg);
+}
+
+/* Sections share one 1200px measure with a 24px gutter. */
+.section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px 84px;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-md);
+}
+.skip-link:focus-visible { left: 12px; top: 12px; }
+
+/* — freestanding rule —
+   Same end-fade as the design system's .hr, but used as a divider between
+   sections rather than inside a text flow, so it carries no vertical margin
+   of its own. */
+.rule {
+  height: 1px;
+  background: linear-gradient(to right,
+    transparent, var(--color-divider) 48px calc(100% - 48px), transparent);
+}
+.rule-tight { margin-bottom: 28px; }
+
+/* — eyebrows —
+   The small uppercase label above each section heading. Three tones: accent
+   on the base ground, dimmed text on the saturated process ground, and a
+   quieter mute for the logo band. */
+.eyebrow {
+  display: block;
+  font-size: 13px;
+  line-height: 14px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin: 0 0 14px;
+}
+.eyebrow-accent { color: var(--color-accent); }
+.eyebrow-dim { color: color-mix(in srgb, var(--color-text) 64%, transparent); }
+.eyebrow-muted {
+  color: color-mix(in srgb, var(--color-text) 55%, transparent);
+  margin-bottom: 36px;
+}
+
+.section-title {
+  font-family: var(--font-heading);
+  font-weight: 500;
+  font-size: clamp(30px, 3.4vw, 40px);
+  line-height: 1.2;
+  letter-spacing: -0.012em;
+  margin: 0 0 42px;
+  max-width: 26ch;
+}
+
+/* — navigation — */
+.site-nav {
+  padding-inline: max(24px, calc((100% - 1200px) / 2 + 24px));
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  backdrop-filter: blur(8px);
+  background: color-mix(in srgb, var(--color-bg) 82%, transparent);
+}
+.site-nav a,
+.site-nav .nav-brand { white-space: nowrap; }
+
+/* — hero — */
+.hero { padding-top: 112px; }
+
+.hero-title {
+  font-family: var(--font-heading);
+  font-weight: 500;
+  font-size: clamp(44px, 6.4vw, 84px);
+  line-height: 1.08;
+  letter-spacing: -0.018em;
+  /* Pulled left by the cap's own side bearing so the glyphs, not the glyph
+     boxes, line up with the gutter. */
+  margin: 0 0 0 -0.06em;
+  max-width: 20ch;
+}
+
+.hero-lede {
+  font-size: 17px;
+  line-height: 28px;
+  max-width: 56ch;
+  margin: 28px 0 0;
+  color: color-mix(in srgb, var(--color-text) 82%, transparent);
+}
+
+.hero-actions {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin-top: 28px;
+}
+
+/* — client logo band —
+   The source artwork is dark-on-transparent, so it is inverted to read on the
+   dark ground and held back to 65% until hover. */
+.logo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 44px 48px;
+  align-items: center;
+  justify-items: center;
+}
+
+.logo-grid img {
+  max-width: 100%;
+  width: auto;
+  height: 38px;
+  object-fit: contain;
+  filter: grayscale(1) invert(1) brightness(1.15) contrast(0.9);
+  opacity: 0.65;
+  transition: opacity 160ms ease;
+}
+.logo-grid img:hover { opacity: 1; }
+
+/* — services —
+   A 1px grid gap over a neutral ground draws the hairline rules between
+   blocks: each block repaints the page background over it. */
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1px;
+  background: var(--color-neutral-700);
+}
+
+.service {
+  background: var(--color-bg);
+  padding: 28px 28px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.service-icon {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  color: var(--color-accent);
+  opacity: 0.85;
+}
+
+.service-title {
+  font-family: var(--font-heading);
+  font-weight: 500;
+  font-size: 21px;
+  line-height: 28px;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.service-copy {
+  font-size: 15.5px;
+  line-height: 26px;
+  margin: 0;
+  color: color-mix(in srgb, var(--color-text) 76%, transparent);
+}
+
+/* — process —
+   The one full-bleed section: the design system's saturated indigo ground,
+   lit from the top right. */
+.process {
+  background:
+    radial-gradient(900px 420px at 85% -40%,
+      color-mix(in srgb, var(--color-section-glow) 70%, transparent), transparent 64%),
+    var(--color-section);
+  padding: 84px 0;
+}
+
+.process-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+.process-inner .section-title { margin-bottom: 48px; max-width: 28ch; }
+
+.process-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 40px 32px;
+}
+
+.phase {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.phase-mark {
+  width: 44px;
+  height: 1px;
+  background: var(--color-text);
+  opacity: 0.5;
+}
+
+.phase-step {
+  font-family: var(--font-heading);
+  font-weight: 500;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--color-text) 64%, transparent);
+  margin: 0;
+}
+
+.phase-title {
+  font-family: var(--font-heading);
+  font-weight: 500;
+  font-size: 23px;
+  line-height: 28px;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.phase-copy {
+  font-size: 15.5px;
+  line-height: 26px;
+  margin: 0;
+  color: color-mix(in srgb, var(--color-text) 78%, transparent);
+}
+
+/* — engagements — */
+.engagements { padding-top: 84px; }
+
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.plan {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 28px;
+}
+.plan .card-kicker { margin: 0; }
+.plan .card-title { margin: 0; font-size: 23px; }
+
+.plan-price {
+  font-family: var(--font-heading);
+  font-weight: 500;
+  font-size: 17px;
+  margin: 0;
+  color: var(--color-accent-300);
+  font-feature-settings: 'tnum' 1;
+}
+
+.plan-copy {
+  font-size: 15.5px;
+  line-height: 26px;
+  margin: 0;
+  color: color-mix(in srgb, var(--color-text) 76%, transparent);
+}
+
+.plan-list {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.plan-list li {
+  font-size: 15px;
+  line-height: 24px;
+  display: flex;
+  gap: 10px;
+  color: color-mix(in srgb, var(--color-text) 82%, transparent);
+}
+.plan-list li::before {
+  content: '\2014';
+  color: var(--color-accent);
+}
+
+/* Pinned to the foot of the card so the three buttons line up across a row of
+   cards with unequal copy. */
+.plan .btn { margin-top: auto; align-self: flex-start; }
+
+.plans-note {
+  font-size: 13px;
+  line-height: 24px;
+  margin: 24px 0 0;
+  color: color-mix(in srgb, var(--color-text) 55%, transparent);
+}
+
+/* — contact — */
+.contact .rule { margin-bottom: 56px; }
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 48px 64px;
+  align-items: start;
+}
+.contact-grid .section-title { margin: 0; max-width: 22ch; }
+
+.contact-lede {
+  font-size: 16px;
+  line-height: 28px;
+  margin: 24px 0 0;
+  max-width: 46ch;
+  color: color-mix(in srgb, var(--color-text) 78%, transparent);
+}
+
+.contact-email {
+  font-size: 15.5px;
+  line-height: 28px;
+  margin: 24px 0 0;
+  color: color-mix(in srgb, var(--color-text) 62%, transparent);
+}
+.contact-email a { color: inherit; }
+.contact-email a:hover { color: var(--color-accent); }
+
+/* Holds the HubSpot embed target and the fallback form. The measure lives here
+   so both are bound to the same 460px column. */
+.contact-form-wrap { max-width: 460px; }
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.contact-form .btn { align-self: flex-start; }
+
+/* Shown only while the HubSpot embed has not taken over the form — see
+   js/site.js. */
+.form-notice {
+  margin: 0;
+  font-size: 14px;
+  line-height: 22px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-divider);
+  background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+  color: color-mix(in srgb, var(--color-text) 88%, transparent);
+}
+[hidden] { display: none !important; }
+
+/* — HubSpot embed —
+   HubSpot injects its own markup into #hs-form-target, so these rules restyle
+   its classes rather than ours. They mirror .field / .input / .btn-primary
+   from the design system so the embedded form matches the rest of the page. */
+.hs-form fieldset { max-width: none !important; border: 0; margin: 0; padding: 0; }
+.hs-form .hs-form-field { margin-bottom: 16px; }
+.hs-form label {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 5px;
+  color: color-mix(in srgb, var(--color-text) 70%, transparent);
+}
+.hs-form .hs-field-desc {
+  font-size: 12px;
+  color: color-mix(in srgb, var(--color-text) 55%, transparent);
+}
+.hs-form input[type='text'],
+.hs-form input[type='email'],
+.hs-form input[type='tel'],
+.hs-form input[type='number'],
+.hs-form select,
+.hs-form textarea {
+  width: 100% !important;
+  min-height: 36px;
+  padding: 6px 10px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--color-text);
+  caret-color: var(--color-accent);
+  background: var(--color-surface);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-md);
+}
+.hs-form textarea { min-height: 90px; resize: vertical; }
+.hs-form input:hover,
+.hs-form select:hover,
+.hs-form textarea:hover {
+  border-color: color-mix(in srgb, var(--color-text) 45%, transparent);
+}
+.hs-form input:focus-visible,
+.hs-form select:focus-visible,
+.hs-form textarea:focus-visible {
+  border-color: var(--color-accent);
+  outline: none;
+}
+.hs-form .hs-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  font-family: var(--font-heading);
+  font-weight: var(--font-heading-weight);
+  font-size: 14px;
+  line-height: 1.2;
+  color: var(--color-accent);
+  background: transparent;
+  border: 1px solid var(--color-accent);
+  padding: var(--space-2) calc(var(--space-3) * 1.2);
+  border-radius: var(--radius-md);
+}
+.hs-form .hs-button:hover { background: color-mix(in srgb, var(--color-accent) 12%, transparent); }
+.hs-form .hs-button:active { background: color-mix(in srgb, var(--color-accent) 22%, transparent); }
+.hs-form .hs-error-msg,
+.hs-form .hs-error-msgs label {
+  font-size: 12px;
+  margin-top: 4px;
+  color: var(--color-accent-300);
+}
+.hs-form ul.hs-error-msgs { list-style: none; margin: 0; padding: 0; }
+.hs-form .inputs-list { list-style: none; margin: 0; padding: 0; }
+.hs-form .hs-form-required { color: var(--color-accent); }
+.submitted-message {
+  font-size: 15.5px;
+  line-height: 26px;
+  color: color-mix(in srgb, var(--color-text) 82%, transparent);
+}
+
+/* — footer — */
+.site-footer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 24px 56px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 32px;
+  justify-content: space-between;
+  font-size: 13px;
+  line-height: 24px;
+  color: color-mix(in srgb, var(--color-text) 50%, transparent);
+  border-top: 1px solid var(--color-neutral-800);
+}
+
+/* — small screens —
+   The layout is fluid down to phone widths on its own (auto-fit grids and
+   clamped type). Only the nav row and the hero's tall opening padding need
+   help. */
+@media (max-width: 640px) {
+  .site-nav {
+    flex-wrap: wrap;
+    row-gap: var(--space-2);
+    column-gap: var(--space-3);
+  }
+  .hero { padding-top: 72px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .logo-grid img { transition: none; }
+}
