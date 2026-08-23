@@ -221,14 +221,18 @@
         <p class="contact-email"><a href="mailto:sales@walnutstlabs.com">sales@walnutstlabs.com</a></p>
       </div>
 
-      <!-- The HubSpot embed renders into #hs-form-target. Set the portal and
-           form ids below and the styled fallback form is replaced automatically;
-           see site/README.md. -->
+      <!-- HubSpot's embed script (loaded at the foot of the page) finds this
+           div by its .hs-form-frame class and renders the form into it. The
+           attributes below are HubSpot's own snippet, unchanged. The form
+           underneath is a fallback: js/site.js retires it once HubSpot has
+           actually painted a form, so a blocked or failed embed leaves a
+           working form on the page rather than an empty column. -->
       <div class="contact-form-wrap">
-        <div id="hs-form-target"
-             data-hs-region="na1"
-             data-hs-portal-id="544318"
-             data-hs-form-id=""></div>
+        <div class="hs-form-frame"
+             id="hs-form-target"
+             data-region="na1"
+             data-form-id="53b4341f-acb6-46ad-96c9-dc55f4f23350"
+             data-portal-id="544318"></div>
 
         <form class="contact-form" id="contact-form-fallback" novalidate>
           <p class="form-notice" id="contact-form-notice" hidden></p>
@@ -257,6 +261,7 @@
 
 </div>
 
+<script src="https://js.hsforms.net/forms/embed/544318.js" defer></script>
 <script src="js/site.js" defer></script>
 </body>
 </html>

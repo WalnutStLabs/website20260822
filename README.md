@@ -43,32 +43,55 @@ domain under Settings → Pages.
 
 ## Configuring the contact form
 
-The contact section is a **HubSpot embedded form**. It needs two ids, on the
-embed target in `index.html`:
+The contact section is a **HubSpot embedded form**, wired with HubSpot's
+current embed snippet — the script finds the div by its `.hs-form-frame` class
+and renders into it. Both live in `index.html`:
 
 ```html
-<div id="hs-form-target"
-     data-hs-region="na1"
-     data-hs-portal-id="544318"
-     data-hs-form-id="YOUR_FORM_ID"></div>
+<div class="hs-form-frame" id="hs-form-target"
+     data-region="na1"
+     data-form-id="53b4341f-acb6-46ad-96c9-dc55f4f23350"
+     data-portal-id="544318"></div>
+...
+<script src="https://js.hsforms.net/forms/embed/544318.js" defer></script>
 ```
 
-* **Portal id** — `544318`, already set. (Portal and form ids are public values;
-  they appear in every HubSpot embed on every public site. Nothing secret here.)
-* **Form id** — still needed. It's the GUID in the form's URL under
-  Marketing → Forms, or in the form's own embed snippet.
-* **Region** — `na1` for this portal.
+Portal `544318`, form `53b4341f-…`, region `na1`. These are public values —
+they appear in every HubSpot embed on every public site — so there is nothing
+secret to protect here.
 
-Until the form id is filled in, the page serves the styled fallback form: it
-matches the design, but submitting it shows a notice pointing at
-sales@walnutstlabs.com rather than pretending the message was sent, and the
-console logs a warning. Once the id is set, `js/site.js` loads HubSpot's embed
-script and swaps the fallback out only after HubSpot has painted a real form —
-so a failed embed leaves the fallback in place rather than an empty column.
+Note this is the **newer** embed, not the older `v2.js` + `hbspt.forms.create()`
+API. The new script is self-driving: there is no create call and no ready
+callback, so `js/site.js` watches the target instead and only retires the
+fallback once a form has actually appeared.
 
-HubSpot's own form markup is restyled to match the design system at the bottom
-of `css/site.css` (`.hs-form …`). If you add field types the prototype did not
-have (checkboxes, dropdowns), check them against those rules.
+### The fallback form
+
+Underneath the embed sits a styled fallback that matches the design. If the
+embed script is blocked (adblockers routinely block `js.hsforms.net`), fails,
+or renders nothing within 12 seconds, the fallback stays on the page and
+submitting it points people at sales@walnutstlabs.com — it never claims a
+message was sent. A warning is logged to the console in that case.
+
+Verified against every way the embed can render: light DOM, shadow root,
+iframe, delayed render, and fully blocked.
+
+### Styling
+
+`css/site.css` restyles HubSpot's markup (`.hs-form …`) to match the design
+system. **That only takes effect if HubSpot renders into the light DOM.** If
+the form renders inside a shadow root or an iframe, page CSS cannot cross that
+boundary and the form will use HubSpot's own styling instead — which will look
+wrong on this dark background. In that case set the form's colours, fonts and
+button styling in HubSpot's form editor rather than here:
+
+* background — transparent or `#161826`
+* text — `#e9e9ed`
+* accent / button — `#9184d9`
+* font — Inter
+
+If you add field types the prototype did not have (checkboxes, dropdowns) and
+the form does render in the light DOM, check them against the `.hs-form` rules.
 
 ## Notes on the implementation
 

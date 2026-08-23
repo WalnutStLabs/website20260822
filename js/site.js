@@ -1,14 +1,18 @@
 /* Walnut St. Labs homepage — contact form.
  *
- * The contact section ships two things: a HubSpot embedded form, and a styled
- * fallback form that matches the design. Which one the visitor sees depends on
- * configuration, not on this file:
+ * The contact section ships two things: HubSpot's embedded form, and a styled
+ * fallback form that matches the design.
  *
- *   - Put the portal and form ids on #hs-form-target in index.html
- *     (data-hs-portal-id / data-hs-form-id / data-hs-region) and the HubSpot
- *     form renders in place of the fallback.
- *   - Leave them blank and the fallback stays up, telling visitors to email
- *     sales@walnutstlabs.com rather than pretending a submission was sent.
+ * HubSpot's current embed (js.hsforms.net/forms/embed/<portal>.js) is
+ * self-driving: it finds .hs-form-frame divs by class and renders into them.
+ * There is no create() call to make and no ready callback to hook, so this
+ * file's only job is to notice when a form has actually appeared and retire
+ * the fallback at that point — never before. If the script is blocked, fails,
+ * or renders nothing, the fallback stays and the section still works.
+ *
+ * The embed may render into the light DOM, a shadow root, or an iframe
+ * depending on how the form is configured in HubSpot, so the check covers all
+ * three rather than assuming one.
  *
  * Nothing else on the page needs JavaScript.
  */
@@ -16,7 +20,8 @@
   'use strict';
 
   var EMAIL = 'sales@walnutstlabs.com';
-  var HS_SCRIPT = 'https://js.hsforms.net/forms/embed/v2.js';
+  var TIMEOUT_MS = 12000; // give up waiting and keep the fallback
+  var POLL_MS = 200;
 
   var target = document.getElementById('hs-form-target');
   var fallback = document.getElementById('contact-form-fallback');
@@ -24,59 +29,60 @@
 
   if (!target || !fallback) return;
 
-  var portalId = (target.dataset.hsPortalId || '').trim();
-  var formId = (target.dataset.hsFormId || '').trim();
-  var region = (target.dataset.hsRegion || 'na1').trim();
-
-  function showNotice(text) {
-    if (!notice) return;
-    notice.textContent = text;
-    notice.hidden = false;
-  }
-
-  /* Fallback behaviour: this form has nowhere to post, so it says so instead of
-   * reporting a send that did not happen. Replaced wholesale once HubSpot is
-   * configured. */
+  /* Fallback behaviour: this form has nowhere to post, so it says so rather
+   * than reporting a send that did not happen. Only ever seen if the embed
+   * fails to render. */
   fallback.addEventListener('submit', function (event) {
     event.preventDefault();
-    showNotice('This form is not connected yet — please email ' + EMAIL + ' and we will reply within a day.');
+    if (!notice) return;
+    notice.textContent =
+      'This form could not load — please email ' + EMAIL + ' and we will reply within a day.';
+    notice.hidden = false;
   });
 
-  if (!portalId || !formId) {
-    // Deliberately loud: a live site with an unconfigured form is a bug.
-    console.warn(
-      '[walnutstlabs] HubSpot form not configured. Set data-hs-portal-id and ' +
-      'data-hs-form-id on #hs-form-target in index.html. Serving the fallback form.'
-    );
+  function hasRenderedForm() {
+    if (target.shadowRoot && target.shadowRoot.childElementCount > 0) return true;
+    if (target.querySelector('iframe, form')) return true;
+    return target.childElementCount > 0;
+  }
+
+  function retireFallback() {
+    fallback.hidden = true;
+  }
+
+  if (hasRenderedForm()) {
+    retireFallback();
     return;
   }
 
-  var script = document.createElement('script');
-  script.src = HS_SCRIPT;
-  script.charset = 'utf-8';
-  script.async = true;
+  var settled = false;
+  var observer = new MutationObserver(check);
+  var poll = window.setInterval(check, POLL_MS);
+  var deadline = window.setTimeout(function () {
+    finish(false);
+  }, TIMEOUT_MS);
 
-  script.addEventListener('load', function () {
-    if (!window.hbspt || !window.hbspt.forms) {
-      showNotice('The contact form could not load. Please email ' + EMAIL + '.');
-      return;
+  observer.observe(target, { childList: true, subtree: true });
+
+  function check() {
+    if (!settled && hasRenderedForm()) finish(true);
+  }
+
+  function finish(rendered) {
+    if (settled) return;
+    settled = true;
+    observer.disconnect();
+    window.clearInterval(poll);
+    window.clearTimeout(deadline);
+    if (rendered) {
+      retireFallback();
+    } else {
+      // Deliberately loud: a live page showing the fallback is a broken embed.
+      console.warn(
+        '[walnutstlabs] HubSpot form did not render within ' + TIMEOUT_MS +
+        'ms — serving the fallback form. Check the embed script, the form id, ' +
+        'and whether an extension is blocking js.hsforms.net.'
+      );
     }
-    window.hbspt.forms.create({
-      region: region,
-      portalId: portalId,
-      formId: formId,
-      target: '#hs-form-target',
-      onFormReady: function () {
-        // Only retire the fallback once HubSpot has actually painted a form,
-        // so a failed render never leaves the section empty.
-        fallback.hidden = true;
-      }
-    });
-  });
-
-  script.addEventListener('error', function () {
-    console.warn('[walnutstlabs] HubSpot embed script failed to load; keeping the fallback form.');
-  });
-
-  document.head.appendChild(script);
+  }
 })();
